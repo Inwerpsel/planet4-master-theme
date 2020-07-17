@@ -1,0 +1,7 @@
+<style>
+	:root {
+		{% for key, value in css_vars %}
+			--{{ key }}: {{ value }};
+		{% endfor %}
+	}
+</style>

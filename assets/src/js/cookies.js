@@ -4,7 +4,7 @@ export const setupCookies = function($) {
     let date = new Date();
     date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
     document.cookie = encodeURI(name) + '=' + encodeURI(value) + ';domain=.' + document.domain + ';path=/;' + '; expires=' + date.toGMTString();
-  }
+  };
 
   window.readCookie = function(name) {
     const nameEQ = name + '=';
@@ -20,22 +20,18 @@ export const setupCookies = function($) {
       }
     }
     return null;
-  }
+  };
 
-  const cookie = readCookie('greenpeace');
+  const cookie = window.readCookie('greenpeace');
   const nro = $('body').data('nro');
 
   if (cookie == null) {
     $('.cookie-notice').css('display', 'flex');
-    const height = $('.cookie-notice').height();
-    $('footer').css('margin-bottom', height + 'px');
   } else {
     window.createCookie('gp_nro', nro, 365);
   }
 
   $('#hidecookie').click(function () {
-    $('.cookie-notice').slideUp('slow');
-    $('footer').css('margin-bottom', '0');
     window.createCookie('greenpeace', '2', 365);
 
     // Remove the 'no_track' cookie, if user accept the cookies consent.
@@ -49,5 +45,7 @@ export const setupCookies = function($) {
     dataLayer.push({
       'event' : 'cookiesConsent'
     });
+
+    $('.cookie-notice').fadeOut('slow');
   });
-}
+};

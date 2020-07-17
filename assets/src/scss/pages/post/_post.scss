@@ -1,9 +1,5 @@
 .single-post {
   .skewed-overlay {
-    &:before {
-      background: $grey-light;
-    }
-
     mask-image: none;
     -webkit-mask-image: none;
   }
@@ -32,7 +28,7 @@
     }
 
     h1 {
-      color: $black;
+      color: $grey-80;
       hyphens: none;
       line-height: 1.2;
 
@@ -44,7 +40,7 @@
     }
 
     .single-post-meta {
-      color: $dark-shade-black;
+      color: $grey-80;
       margin: 0 0 16px 0;
       font-size: 0.8125rem;
       font-weight: 300;

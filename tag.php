@@ -9,6 +9,7 @@
  * @package P4MT
  */
 
+use P4\MasterTheme\TaxonomyCampaign;
 use Timber\Timber;
 use P4GBKS\Blocks\Covers;
 use P4GBKS\Blocks\Articles;
@@ -27,12 +28,17 @@ if ( is_tag() ) {
 		$redirect_page               = get_post( $redirect_id );
 		$wp_query->queried_object    = $redirect_page;
 		$wp_query->queried_object_id = $redirect_page->ID;
+
+		// Allow modification of redirect page behavior.
+		do_action( 'p4_action_tag_page_redirect', $redirect_page );
+
 		include 'page.php';
 
 	} else {
 
 		$templates = [ 'tag.twig', 'archive.twig', 'index.twig' ];
 
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$posts = get_posts(
 			[
 				'posts_per_page'   => 1,
@@ -59,7 +65,7 @@ if ( is_tag() ) {
 		}
 		$context['page_category'] = 'Tag Page';
 
-		$campaign = new P4_Taxonomy_Campaign( $templates, $context );
+		$campaign = new TaxonomyCampaign( $templates, $context );
 
 		$campaign->add_block(
 			Covers::BLOCK_NAME,

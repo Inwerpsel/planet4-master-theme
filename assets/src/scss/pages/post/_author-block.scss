@@ -1,9 +1,16 @@
 .author-block {
-  margin-bottom: 55px;
   overflow: hidden;
+  display: inline-block;
+  margin-top: $space-xs;
+  margin-bottom: $space-md;
+
+  @include large-and-up {
+    margin-top: $space-md;
+    margin-bottom: $space-lg;
+  }
 
   @include medium-and-up {
-    display: flex;
+    display: inline-flex;
     align-items: stretch;
   }
 }
@@ -55,7 +62,6 @@
 
   @supports (display: -webkit-box) {
     display: -webkit-box;
-    -webkit-line-clamp: 5;
     -webkit-box-orient: vertical;
     max-height: none;
   }
@@ -69,7 +75,7 @@
     width: 100%;
   }
 
-  @include medium-and-up {
+  @include large-and-up {
     img {
       width: auto;
     }

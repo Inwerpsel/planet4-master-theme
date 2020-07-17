@@ -15,6 +15,7 @@ div.page-template {
   }
 
   @include x-large-and-up {
+    font-size: 1.125rem;
     width: 1140px;
   }
 
@@ -31,47 +32,19 @@ div.page-template {
   img {
     max-width: 100%;
     height: auto;
-
-    &.alignnone {
-      margin-top: $space-md;
-      margin-bottom: $space-xl;
-
-      @include large-and-up {
-        margin-top: $space-lg;
-        margin-bottom: $space-xxl;
-      }
-    }
   }
+}
 
-  .alignleft {
-    @include small-and-up {
-      float: left;
-      margin: 0 $n10 $n10 0;
-      padding-top: 6px;
-    }
-  }
-
-  .alignright {
-    @include small-and-up {
-      float: right;
-      margin: 0 0 $n10 $n10;
-      padding-top: 6px;
-    }
-  }
-
-  .aligncenter {
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-  }
-
-  .single-campaign & {
-    section:first-child {
-      margin-top: $n40;
-    }
-
+.single-campaign {
+  .page-template {
     > p:last-child {
       margin-bottom: $space-xxl;
+    }
+
+    &:not(.no-page-title) {
+      section:first-child {
+        margin-top: $n40;
+      }
     }
   }
 }

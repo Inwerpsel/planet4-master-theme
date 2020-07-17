@@ -9,6 +9,8 @@
  * @since    Timber 0.1
  */
 
+use P4\MasterTheme\Context;
+use P4\MasterTheme\Post;
 use Timber\Timber;
 
 // Initializing variables.
@@ -16,9 +18,9 @@ $context = Timber::get_context();
 /**
  * P4 Post Object
  *
- * @var P4_Post $post
+ * @var Post $post
  */
-$post            = Timber::query_post( false, 'P4_Post' );
+$post            = Timber::query_post( false, Post::class ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 $context['post'] = $post;
 
 // Strip Take Action Boxout block from the post content to add outside the normal block container.
@@ -40,18 +42,21 @@ $post->set_issues_links();
 // p4_take_action_page parameter to populate the take action boxout block
 // Author override parameter. If this is set then the author profile section will not be displayed.
 $page_meta_data                 = get_post_meta( $post->ID );
+$page_meta_data                 = array_map( 'reset', $page_meta_data );
 $page_terms_data                = get_the_terms( $post, 'p4-page-type' );
-$context['background_image']    = $page_meta_data['p4_background_image_override'][0] ?? '';
-$take_action_page               = $page_meta_data['p4_take_action_page'][0] ?? '';
-$context['page_type']           = $page_terms_data[0]->name ?? '';
-$context['page_term_id']        = $page_terms_data[0]->term_id ?? '';
-$context['page_category']       = 'Post Page';
-$context['page_type_slug']      = $page_terms_data[0]->slug ?? '';
-$context['social_accounts']     = $post->get_social_accounts( $context['footer_social_menu'] );
-$context['og_title']            = $post->get_og_title();
-$context['og_description']      = $post->get_og_description();
-$context['og_image_data']       = $post->get_og_image();
+$page_terms_data                = is_array( $page_terms_data ) ? reset( $page_terms_data ) : null;
+$context['background_image']    = $page_meta_data['p4_background_image_override'] ?? '';
+$take_action_page               = $page_meta_data['p4_take_action_page'] ?? '';
+$context['page_type']           = $page_terms_data->name ?? '';
+$context['page_term_id']        = $page_terms_data->term_id ?? '';
 $context['custom_body_classes'] = 'white-bg';
+$context['page_type_slug']      = $page_terms_data->slug ?? '';
+$context['social_accounts']     = $post->get_social_accounts( $context['footer_social_menu'] );
+$context['page_category']       = 'Post Page';
+$context['post_tags']           = implode( ', ', $post->tags() );
+
+Context::set_og_meta_fields( $context, $post );
+Context::set_campaign_datalayer( $context, $page_meta_data );
 
 $context['filter_url'] = add_query_arg(
 	[
@@ -112,8 +117,6 @@ $context['post_comments_count'] = get_comments(
 		'count'   => true,
 	]
 );
-
-$context['post_tags'] = implode( ', ', $post->tags() );
 
 if ( post_password_required( $post->ID ) ) {
 	$context['login_url'] = wp_login_url();

@@ -3,8 +3,8 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n > 1;\n"
 "Project-Id-Version: Greenpeace Planet 4 Master Theme\n"
 "POT-Creation-Date: 2018-12-13 11:03+0000\n"
-"PO-Revision-Date: 2019-05-29 10:24+0000\n"
-"Last-Translator: Luca Tiralongo <ltiralon@greenpeace.org>\n"
+"PO-Revision-Date: 2019-11-26 14:49+0000\n"
+"Last-Translator: Shawn Inder <shawn.inder@greenpeace.org>\n"
 "Language-Team: French (Canada)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -21,7 +21,7 @@ msgstr ""
 "X-Poedit-SearchPathExcluded-0: *.js\n"
 "Language: fr_CA\n"
 "Report-Msgid-Bugs-To: \n"
-"X-Loco-Version: 2.2.2; wp-5.2.1"
+"X-Loco-Version: 2.3.1; wp-5.3"
 
 #: single.php:33
 msgid "Post page"
@@ -146,7 +146,7 @@ msgstr "PLUS DE RÉSULTATS"
 
 #. Name of the template
 msgid "Evergreen Page"
-msgstr ""
+msgstr "Page Persistante"
 
 #. Name of the template
 msgid "Sitemap Page"
@@ -174,7 +174,7 @@ msgstr "Posts par"
 
 #: templates/author.twig:56 templates/taxonomy.twig:38
 msgid "Load More"
-msgstr ""
+msgstr "Charger plus"
 
 #: templates/navigation-bar.twig:6
 msgid "Toggle navigation menu"
@@ -204,7 +204,7 @@ msgstr "Changer de pays"
 
 #: templates/navigation-bar.twig:60
 msgid "Toggle search form"
-msgstr ""
+msgstr "Afficher/cacher le formulaire de recherche"
 
 #: templates/cookies.twig:8
 msgid "GOT IT!"
@@ -331,11 +331,11 @@ msgstr "par"
 
 #: templates/single.twig:53 templates/comments_section.twig:2
 msgid "Comments"
-msgstr ""
+msgstr "Commentaires"
 
 #: templates/comments_section.twig:8
 msgid "Discussion"
-msgstr ""
+msgstr "Discussion"
 
 #: templates/taxonomy.twig:18
 msgid "Results"
@@ -343,11 +343,11 @@ msgstr "Résultats"
 
 #: templates/blocks/share_buttons.twig:7 templates/blocks/share_buttons.twig:14
 msgid "Share on"
-msgstr ""
+msgstr "Partager sur"
 
 #: templates/blocks/share_buttons.twig:21
 msgid "Share via"
-msgstr ""
+msgstr "Partager via"
 
 #: templates/blocks/author_profile.twig:4
 msgid "about the author"
@@ -355,23 +355,23 @@ msgstr "à propos de Greenpeace"
 
 #: templates/comment_form/email_field.twig:2
 msgid "Email"
-msgstr ""
+msgstr "Courriel"
 
 #: templates/comment_form/email_field.twig:3
 msgid "Your Email"
-msgstr ""
+msgstr "Votre courriel"
 
 #: templates/comment_form/comment_field.twig:2
 msgid "Comment"
-msgstr ""
+msgstr "Commentaire"
 
 #: templates/comment_form/comment_field.twig:3
 msgid "Your Comment"
-msgstr ""
+msgstr "Votre Commentaire"
 
 #: templates/comment_form/author_field.twig:2
 msgid "Name"
-msgstr ""
+msgstr "Nom"
 
 #: templates/comment_form/author_field.twig:3
 msgid "Your Name"
@@ -379,7 +379,7 @@ msgstr "Votre nom"
 
 #: templates/comment_form/submit_button.twig:1
 msgid "Post Comment"
-msgstr ""
+msgstr "Soumettre"
 
 #. Theme Name of the plugin/theme
 msgid "Greenpeace Planet 4 Master Theme"

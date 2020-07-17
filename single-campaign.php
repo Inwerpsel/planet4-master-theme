@@ -5,6 +5,9 @@
  * @package P4MT
  */
 
+use P4\MasterTheme\Context;
+use P4\MasterTheme\PostCampaign;
+use P4\MasterTheme\Post;
 use Timber\Timber;
 
 // Initializing variables.
@@ -13,155 +16,98 @@ $context = Timber::get_context();
 /**
  * Post object.
  *
- * @var P4_Post $post
+ * @var Post $post
  * */
-$post            = Timber::query_post( false, 'P4_Post' );
+$post            = Timber::query_post( false, Post::class ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 $context['post'] = $post;
 
-// Get the cmb2 custom fields data.
-$page_meta_data    = get_post_meta( $post->ID );
-$campaign_template = ! empty( $page_meta_data['_campaign_page_template'][0] ) ? $page_meta_data['_campaign_page_template'][0] : false;
+$meta = get_post_meta( $post->ID );
+// No need to check the user here as that already happens in wp_get_post_autosave.
+if ( isset( $_GET['preview'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	$post_preview = wp_get_post_autosave( $post->ID );
+	if ( $post_preview ) {
+		$meta = array_merge( $meta, get_post_meta( $post_preview->ID ) );
+	}
+}
+$meta = array_map( 'reset', $meta );
 
-if ( $campaign_template ) {
-	$context['custom_body_classes'] = 'brown-bg theme-' . $campaign_template;
+$current_level_campaign_id = $post->ID;
+
+do {
+	$top_level_campaign_id     = $current_level_campaign_id;
+	$current_level_campaign_id = wp_get_post_parent_id( $current_level_campaign_id );
+} while ( $current_level_campaign_id );
+
+if ( $top_level_campaign_id === $post->ID ) {
+	$campaign_meta = $meta;
+} else {
+	$campaign_meta = get_post_meta( $top_level_campaign_id );
+	$campaign_meta = array_map( 'reset', $campaign_meta );
+}
+
+// This is just an example of how to get children pages, this will probably be done in some kind of menu block.
+$sub_pages = get_children(
+	[
+		'post_parent' => $post->ID,
+		'post_type'   => 'campaign',
+	]
+);
+
+$context['$sub_pages'] = array_map(
+	static function ( $page ) {
+		return [
+			'link'  => get_permalink( $page->ID ),
+			'title' => $page->post_title,
+		];
+	},
+	$sub_pages
+);
+
+
+$theme_name = $campaign_meta['theme'] ?? $campaign_meta['_campaign_page_template'] ?? null;
+
+if ( $theme_name ) {
+	$context['custom_body_classes'] = 'white-bg theme-' . $theme_name;
 }
 
 // Save custom style settings.
 $custom_styles = [];
 
-// Set specific CSS for Montserrat.
-$pf = $post->campaign_header_primary;
+$custom_styles['nav_type']            = $campaign_meta['campaign_nav_type'] ?? null;
+$custom_styles['nav_border']          = $campaign_meta['campaign_nav_border'] ?? null;
+$custom_styles['campaign_logo_color'] = 'green';
+$custom_styles['campaign_logo']       = PostCampaign::get_logo( $campaign_meta );
 
-$header_font_style = [
-	'Montserrat'       => "font-family: 'Montserrat' !important; font-weight: 900 !important;",
-	'Montserrat_Light' => "font-family: 'Montserrat' !important; font-weight: 500 !important;",
-];
-
-if ( $pf && array_key_exists( $pf, $header_font_style ) ) {
-	$header_font = $header_font_style[ $pf ];
-} else {
-	$header_font = "font-family: {$pf} !important;";
+if ( PostCampaign::DEFAULT_NAVBAR_THEME !== $custom_styles['nav_type'] ) {
+	$custom_styles['campaign_logo_color'] = isset( $campaign_meta['campaign_logo_color'] ) && ! empty( $campaign_meta['campaign_logo_color'] )
+		? $campaign_meta['campaign_logo_color']
+		: 'light';
 }
-
-$footer_links_color = 'light' === $post->campaign_logo_color ? '#FFFFFF' : '#1A1A1A';
-
-$footer_theme = $post->campaign_footer_theme ?? null;
-
-if ( 'white' == $footer_theme ) {
-	$default_footer_links_color = $post->campaign_nav_color ?? '#1A1A1A';
-	$footer_links_color         = $post->footer_links_color ?? $default_footer_links_color;
-	$footer_color               = '#FFFFFF';
-} else {
-	$footer_color = $post->campaign_nav_color ?? null;
-}
-
-$passive_button_colors_map = [
-	'#ffd204' => '#ffe467',
-	'#66cc00' => '#66cc00',
-	'#6ed961' => '#a7e021',
-	'#21cbca' => '#77ebe0',
-	'#ee562d' => '#f36d3a',
-	'#7a1805' => '#a01604',
-	'#2077bf' => '#2077bf',
-	'#1b4a1b' => '#1b4a1b',
-];
-
-$campaigns_font_map = [
-	'default'   => 'lora',
-	'antarctic' => 'sanctuary',
-	'arctic'    => 'Save the Arctic',
-	'climate'   => 'Jost',
-	'forest'    => 'Kanit',
-	'oceans'    => 'Montserrat',
-	'oil'       => 'Anton',
-	'plastic'   => 'Montserrat',
-];
-
-if ( $campaign_template ) {
-	$context['custom_body_classes'] = 'brown-bg theme-' . $campaign_template;
-	$campaign_font                  = $campaigns_font_map[ $campaign_template ];
-} else {
-	$campaign_font = $campaigns_font_map['default'];
-}
-
-if ( 'campaign' == $post->campaign_body_font ) {
-	$body_font = $campaign_font;
-} else {
-	$body_font = $post->campaign_body_font ?? null;
-}
-
-$custom_styles['css']['nav_color']               = $post->campaign_nav_color ? ".navbar { background-color: {$post->campaign_nav_color} !important;}" : null;
-$custom_styles['nav_type']                       = $post->campaign_nav_type;
-$custom_styles['nav_border']                     = $post->campaign_nav_border;
-$custom_styles['campaign_logo_color']            = $post->campaign_logo_color ?? 'light';
-$custom_styles['css']['footer_color']            = $footer_color ? ".site-footer { background-color: {$footer_color} !important;}" : null;
-$custom_styles['css']['footer_svg_icons_color']  = ".site-footer_min .icon { fill: {$footer_links_color} !important }";
-$custom_styles['css']['footer_elements_color']   = ".site-footer a { color: {$footer_links_color} !important }";
-$custom_styles['css']['footer_separatos_color']  = ".site-footer li { color: {$footer_links_color} !important }";
-$custom_styles['css']['footer_year_color']       = ".site-footer .gp-year { color: {$footer_links_color} !important; font-family: Roboto !important }";
-$custom_styles['css']['footer_copyright_color']  = ".site-footer .copyright-text { color: {$footer_links_color} !important }";
-$custom_styles['css']['header_color']            = $post->campaign_header_color ? " h1, h2, h3, h4, h5 { color: {$post->campaign_header_color} !important;}" : null;
-$custom_styles['css']['campaign_header_primary'] = $post->campaign_header_primary ? " h1, h2, h3, h4, h5 { {$header_font} }" : null;
-$custom_styles['css']['header_serif']            = $post->campaign_header_serif ? " .page-header { font-family: {$post->campaign_header_serif}!important;}" : null;
-$custom_styles['css']['header_sans']             = $post->campaign_header_sans ? " .page-header { font-family: {$post->campaign_header_sans} !important;}" : null;
-$custom_styles['css']['body_font']               = $body_font ? " body, p { font-family: '{$body_font}' !important;}" : null;
-$custom_styles['css']['btn_primary']             = $post->campaign_primary_color ? " .btn-primary { background: {$passive_button_colors_map[strtolower($post->campaign_primary_color)]} !important; border-color: {$passive_button_colors_map[$post->campaign_primary_color]} !important;}" : null;
-$custom_styles['css']['btn_primary_hover']       = $post->campaign_primary_color ? " .btn-primary:hover { background: {$post->campaign_primary_color} !important; border-color: {$post->campaign_primary_color} !important;}" : null;
-$custom_styles['css']['btn_secondary']           = $post->campaign_secondary_color
-	? " .btn-secondary, .btn-action.cover-card-btn {
-			background: rgba(255, 255, 255, .75) !important;
-			border: 1px solid {$post->campaign_secondary_color} !important;
-			color: {$post->campaign_secondary_color} !important;
-		}"
-	: null;
-$custom_styles['css']['btn_secondary_hover']     = $post->campaign_secondary_color
-	? " .btn-secondary:hover {
-			background: {$post->campaign_secondary_color} !important;
-			border: 1px solid {$post->campaign_secondary_color} !important;
-			color: white !important;
-		}"
-	: null;
-
-$custom_styles['css']['anchor']         = $post->campaign_secondary_color ? " a { color: {$post->campaign_secondary_color } !important; }" : null;
-$custom_styles['css']['cover-card-btn'] = $post->campaign_primary_color ? " .cover-card:hover .cover-card-btn { background-color: {$post->campaign_primary_color} !important; border-color: {$post->campaign_primary_color} !important;}" : null;
-$custom_styles['campaign_logo']         = $post->campaign_logo ?? null;
 
 // Set GTM Data Layer values.
 $post->set_data_layer();
 $data_layer = $post->get_data_layer();
 
-$context['post']                        = $post;
-$context['header_title']                = is_front_page() ? ( $page_meta_data['p4_title'][0] ?? '' ) : ( $page_meta_data['p4_title'][0] ?? $post->title );
-$context['header_subtitle']             = $page_meta_data['p4_subtitle'][0] ?? '';
-$context['header_description']          = wpautop( $page_meta_data['p4_description'][0] ?? '' );
-$context['header_button_title']         = $page_meta_data['p4_button_title'][0] ?? '';
-$context['header_button_link']          = $page_meta_data['p4_button_link'][0] ?? '';
-$context['header_button_link_checkbox'] = $page_meta_data['p4_button_link_checkbox'][0] ?? '';
-$context['hide_page_title_checkbox']    = $page_meta_data['p4_hide_page_title_checkbox'][0] ?? '';
-$context['social_accounts']             = $post->get_social_accounts( $context['footer_social_menu'] );
-$context['page_category']               = $data_layer['page_category'];
-$context['post_tags']                   = implode( ', ', $post->tags() );
+Context::set_header( $context, $meta, $post->title );
+Context::set_background_image( $context );
+Context::set_og_meta_fields( $context, $post );
+Context::set_campaign_datalayer( $context, $campaign_meta );
 
-$background_image_id                = get_post_meta( get_the_ID(), 'background_image_id', 1 );
-$context['background_image']        = wp_get_attachment_url( $background_image_id );
-$context['background_image_srcset'] = wp_get_attachment_image_srcset( $background_image_id, 'full' );
-$context['og_title']                = $post->get_og_title();
-$context['og_description']          = $post->get_og_description();
-$context['og_image_data']           = $post->get_og_image();
-$context['custom_styles']           = $custom_styles;
-
-// P4 Campaign/dataLayer fields.
-$context['cf_campaign_name'] = $page_meta_data['p4_campaign_name'][0] ?? '';
-$context['cf_basket_name']   = $page_meta_data['p4_basket_name'][0] ?? '';
-$context['cf_scope']         = $page_meta_data['p4_scope'][0] ?? '';
-$context['cf_department']    = $page_meta_data['p4_department'][0] ?? '';
+$context['post']            = $post;
+$context['social_accounts'] = $post->get_social_accounts( $context['footer_social_menu'] );
+$context['page_category']   = $data_layer['page_category'];
+$context['post_tags']       = implode( ', ', $post->tags() );
+$context['custom_styles']   = $custom_styles;
+$context['css_vars']        = PostCampaign::css_vars( $campaign_meta );
 
 // Social footer link overrides.
 $context['social_overrides'] = [];
 
-for ( $i = 1; $i <= 5; $i++ ) {
-	if ( isset( $page_meta_data[ 'campaign_footer_item' . $i ] ) ) {
-		$campaign_footer_item = maybe_unserialize( $page_meta_data[ 'campaign_footer_item' . $i ][0] );
+foreach ( range( 1, 5 ) as $i ) {
+	$footer_item_key = 'campaign_footer_item' . $i;
+
+	if ( isset( $campaign_meta[ $footer_item_key ] ) ) {
+		$campaign_footer_item = maybe_unserialize( $campaign_meta[ $footer_item_key ] );
 		if ( $campaign_footer_item['url'] && $campaign_footer_item['icon'] ) {
 			$context['social_overrides'][ $i ]['url']  = $campaign_footer_item['url'];
 			$context['social_overrides'][ $i ]['icon'] = $campaign_footer_item['icon'];
@@ -174,5 +120,5 @@ if ( post_password_required( $post->ID ) ) {
 
 	Timber::render( 'single-password.twig', $context );
 } else {
-	Timber::render( array( 'single-' . $post->ID . '.twig', 'single-' . $post->post_type . '.twig', 'single.twig' ), $context );
+	Timber::render( [ 'single-' . $post->ID . '.twig', 'single-' . $post->post_type . '.twig', 'single.twig' ], $context );
 }

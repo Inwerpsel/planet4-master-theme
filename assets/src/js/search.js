@@ -1,7 +1,18 @@
-/* global localizations */
+/* global localizations, LazyLoad */
+
+if (!window.lazyLoad) {
+  window.lazyLoad = new LazyLoad({
+    elements_selector: '.lazyload'
+  });
+}
 
 // Search page.
 export const setupSearch = function($) {
+  const isSearch = !!$('body.search').length;
+  if (!isSearch) {
+    return;
+  }
+
   const $search_form      = $( '#search_form' );
   const $load_more_button = $( '.btn-load-more-click-scroll' );
   let load_more_count   = 0;
@@ -46,11 +57,6 @@ export const setupSearch = function($) {
   });
 
   let $search_results = $( '.multiple-search-result' );
-  // Add filter by clicking on the page type label inside a result item.
-  // Delegate event handler to the dynamically created descendant elements.
-  $search_results.off( 'click', '.search-result-item-head' ).on( 'click', '.search-result-item-head', function() {
-    window.location.href = $( this ).data( 'href' );
-  });
 
   // Navigate to the page of the search result item when clicking on it's thumbnail image.
   // Delegate event handler to the dynamically created descendant elements.
@@ -62,7 +68,8 @@ export const setupSearch = function($) {
   $('.search-result-item-image').hover(
     function() {
       $('.search-result-item-headline', $(this).parent()).addClass('search-hover');
-    }, function() {
+    },
+    function() {
       $('.search-result-item-headline', $(this).parent()).removeClass('search-hover');
     }
   );
@@ -96,6 +103,7 @@ export const setupSearch = function($) {
           'search-action': 'get_paged_posts',
           'search_query':  $( '#search_input' ).val().trim(),
           'paged':         next_page,
+          'orderby': $( '#orderby', $search_form ).val(),
           'query-string':  decodeURIComponent( location.search ).substr( 1 ) // Ignore the ? in the search url (first char).
         },
         dataType: 'html'
@@ -103,6 +111,9 @@ export const setupSearch = function($) {
         // Append the response at the bottom of the results and then show it.
         $( '.multiple-search-result .list-unstyled' ).append( response );
         $( '.row-hidden:last' ).removeClass( 'row-hidden' ).show( 'fast' );
+
+        window.lazyLoad.update();
+
         if (posts_per_load * next_page > total_posts) {
           $load_more_button.hide();
         }
@@ -116,6 +127,8 @@ export const setupSearch = function($) {
         $load_more_button.closest( '.load-more-button-div' ).hide( 'fast' );
       }
       $row.first().show( 'fast' ).removeClass( 'row-hidden' );
+
+      window.lazyLoad.update();
     }
   });
 
@@ -146,6 +159,8 @@ export const setupSearch = function($) {
         }
         if (window_scroll > (element_top + element_height - window_height)) {
           $('.row-hidden').removeClass('row-hidden').show('fast');
+
+          window.lazyLoad.update();
         }
       }
       return false;
