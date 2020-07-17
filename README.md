@@ -5,7 +5,7 @@
 ## Introduction
 
 ### What is it?
-This is the master Wordpress theme for Greenpeace Planet4 project.
+This is the master WordPress theme for Greenpeace Planet4 project.
 You can learn more about this project on [the planet4 blog](https://medium.com/planet4).
 
 This theme is based on the [`timber/starter-theme`](https://github.com/timber/starter-theme) codebase.
@@ -13,7 +13,7 @@ It has a correlated [child theme](https://github.com/greenpeace/greenpeace-plane
 
 ## How to use this theme in planet4
 
-You can use the theme in Wordpress directly, by including it at your `composer.json` file:
+You can use the theme in WordPress directly, by including it at your `composer.json` file:
 ```
 "require": {
     ...
